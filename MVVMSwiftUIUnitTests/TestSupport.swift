@@ -117,6 +117,7 @@ func makeEpisode(id: Int, name: String) -> EpisodeEntity {
         name: name,
         airDate: nil,
         episode: "S01E01",
+        imageURL: nil,
         characterURLs: [],
         url: nil,
         createdAt: nil

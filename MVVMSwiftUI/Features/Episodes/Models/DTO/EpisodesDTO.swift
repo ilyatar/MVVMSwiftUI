@@ -46,6 +46,7 @@ nonisolated extension EpisodesDTO.Result {
             name: name,
             airDate: airDate.flatMap(Self.parseAirDate),
             episode: episode,
+            imageURL: nil,
             characterURLs: characters?.compactMap(URL.init(string:)) ?? [],
             url: url.flatMap(URL.init(string:)),
             createdAt: created.flatMap(Self.parseISO8601Date)
@@ -64,4 +65,15 @@ nonisolated extension EpisodesDTO.Result {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter.date(from: value)
     }
+}
+
+nonisolated struct TVMazeEpisodeDTO: Decodable, Sendable {
+    struct Image: Decodable, Sendable {
+        let medium: URL?
+        let original: URL?
+    }
+
+    let season: Int
+    let number: Int?
+    let image: Image?
 }

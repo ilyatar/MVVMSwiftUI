@@ -71,13 +71,34 @@ struct ServiceTests {
             }
             """.utf8
         )
+        let tvMazeData = Data(
+            """
+            [
+              {
+                "season": 1,
+                "number": 1,
+                "image": {
+                  "medium": "https://static.tvmaze.com/pilot-medium.jpg",
+                  "original": "https://static.tvmaze.com/pilot-original.jpg"
+                }
+              }
+            ]
+            """.utf8
+        )
         URLProtocolStub.setHandler { request in
             let url = try #require(request.url)
-            #expect(url.path == "/api/episode/1")
+            let data: Data
+            if url.host == "api.tvmaze.com" {
+                #expect(url.path == "/shows/216/episodes")
+                data = tvMazeData
+            } else {
+                #expect(url.path == "/api/episode/1")
+                data = responseData
+            }
             let response = try #require(
                 HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
             )
-            return (response, responseData)
+            return (response, data)
         }
         defer { URLProtocolStub.clearHandler() }
 
@@ -88,6 +109,7 @@ struct ServiceTests {
         #expect(episodes.first?.name == "Pilot")
         #expect(episodes.first?.episode == "S01E01")
         #expect(episodes.first?.airDate != nil)
+        #expect(episodes.first?.imageURL?.absoluteString == "https://static.tvmaze.com/pilot-original.jpg")
     }
 
     @Test
@@ -116,13 +138,42 @@ struct ServiceTests {
             ]
             """.utf8
         )
+        let tvMazeData = Data(
+            """
+            [
+              {
+                "season": 1,
+                "number": 1,
+                "image": {
+                  "medium": "https://static.tvmaze.com/pilot-medium.jpg",
+                  "original": null
+                }
+              },
+              {
+                "season": 1,
+                "number": 2,
+                "image": {
+                  "medium": "https://static.tvmaze.com/episode-2-medium.jpg",
+                  "original": "https://static.tvmaze.com/episode-2-original.jpg"
+                }
+              }
+            ]
+            """.utf8
+        )
         URLProtocolStub.setHandler { request in
             let url = try #require(request.url)
-            #expect(url.path == "/api/episode/1,2")
+            let data: Data
+            if url.host == "api.tvmaze.com" {
+                #expect(url.path == "/shows/216/episodes")
+                data = tvMazeData
+            } else {
+                #expect(url.path == "/api/episode/1,2")
+                data = responseData
+            }
             let response = try #require(
                 HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
             )
-            return (response, responseData)
+            return (response, data)
         }
         defer { URLProtocolStub.clearHandler() }
 
@@ -130,5 +181,7 @@ struct ServiceTests {
         let episodes = try await service.fetchEpisodes(ids: [1, 2])
 
         #expect(episodes.map(\.id) == [1, 2])
+        #expect(episodes[0].imageURL?.absoluteString == "https://static.tvmaze.com/pilot-medium.jpg")
+        #expect(episodes[1].imageURL?.absoluteString == "https://static.tvmaze.com/episode-2-original.jpg")
     }
 }

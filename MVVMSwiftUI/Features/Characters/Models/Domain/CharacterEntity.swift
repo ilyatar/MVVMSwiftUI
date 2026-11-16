@@ -7,8 +7,8 @@
 
 import Foundation
 
-struct CharacterEntity: Identifiable, Equatable, Sendable {
-    struct Location: Equatable {
+nonisolated struct CharacterEntity: Identifiable, Equatable, Sendable {
+    nonisolated struct Location: Equatable, Sendable {
         let name: String?
         let url: URL?
     }

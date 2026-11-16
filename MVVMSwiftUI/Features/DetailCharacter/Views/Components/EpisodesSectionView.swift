@@ -12,14 +12,22 @@ struct EpisodesSectionView: View {
                 .frame(maxWidth: .infinity, minHeight: 140)
 
         case .loaded(let episodes):
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 12) {
-                    ForEach(episodes) { episode in
-                        EpisodeCard(episode: episode)
+            VStack(alignment: .leading, spacing: 6) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 12) {
+                        ForEach(episodes) { episode in
+                            EpisodeCard(episode: episode)
+                        }
                     }
                 }
+                .frame(height: 260)
+
+                if let tvMazeURL = URL(string: "https://www.tvmaze.com/shows/216/rick-and-morty") {
+                    Link("Изображения: TVmaze", destination: tvMazeURL)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
-            .frame(height: 150)
 
         case .empty:
             Text("Эпизоды не найдены")
@@ -45,6 +53,14 @@ private struct EpisodeCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            CachedAsyncImage(url: episode.imageURL)
+                .frame(maxWidth: .infinity)
+                .padding(0)
+                .frame(height: 96)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .accessibilityLabel("Кадр из эпизода")
+
             Text(value(episode.episode))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
@@ -61,7 +77,7 @@ private struct EpisodeCard: View {
                 .lineLimit(1)
         }
         .padding(14)
-        .frame(width: 220, height: 130, alignment: .leading)
+        .frame(width: 220, height: 240, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
     }
